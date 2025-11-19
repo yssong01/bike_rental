@@ -41,7 +41,7 @@ bike_rental/
 ├── api/
 │   └── bike.js              # Vercel Serverless Proxy (HTTP → HTTPS)
 ├── css/
-│   └── style.css            # Vercel Serverless Proxy (HTTP → HTTPS)
+│   └── style.css            # 스타일 시트 분리 저장
 ├── js/
 │   └── config.js            # Kakao 지도 API 키 분리 저장
 ├── index.html               # 메인 웹페이지 (동적 SDK 로드 적용)
