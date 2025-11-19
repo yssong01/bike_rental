@@ -68,6 +68,17 @@
         word-break: break-all; /* 한글/긴 문자열도 줄바꿈 허용 ← 핵심 수정 */
       }
 
+      /* InfoWindow 기본 wrapper 둥글게 만들기 */
+      div.info,
+      div.wrap,
+      .info,
+      .wrap {
+        border-radius: 10px !important; /* 둥근 모서리 적용 */
+        overflow: hidden !important; /* 내부 영역만 보이도록 */
+        border: none !important; /* 기본 거친 검은 테두리 제거 */
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+      }
+
       .bike-info-title {
         font-weight: bold;
         margin-bottom: 4px;
