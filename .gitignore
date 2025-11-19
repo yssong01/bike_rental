@@ -1,0 +1,4 @@
+# 환경 변수 파일은 GitHub에 올리지 않기
+.env
+.env.local
+.env.*.local
