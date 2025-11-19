@@ -1,29 +1,28 @@
-서울시 공공자전거 실시간 지도 시각화 (따릉이 API + Kakao Map + Vercel Serverless)
+서울시 공공자전거 실시간 지도 시각화
+
+따릉이 API + Kakao Map + Vercel Serverless
 
 서울시 공공자전거 실시간 데이터를 활용하여 대여소 위치와 잔여 자전거 대수를 지도 위에 시각화한 프로젝트입니다.
-카카오맵 JavaScript API와 Vercel Serverless Functions를 이용해 전체 데이터를 HTTPS로 안정적으로 불러올 수 있도록 구성하였습니다.
+GitHub Pages(HTTPS) 환경에서도 데이터를 호출할 수 있도록 Vercel Serverless Functions를 이용해 프록시 서버를 구성했습니다.
 
+배포 페이지
 https://yssong01.github.io/bike_rental/
-
-
-서울시 공공자전거 실시간 지도 시각화 (따릉이 API + Kakao Map + Vercel Serverless)
-
-서울시 공공자전거 실시간 데이터를 활용하여 대여소 위치와 잔여 자전거 대수를 지도 위에 시각화한 프로젝트입니다.
-카카오맵 JavaScript API와 Vercel Serverless Functions를 이용해 전체 데이터를 HTTPS로 안정적으로 불러올 수 있도록 구성하였습니다.
 
 1. 프로젝트 개요
 
-서울시 공공자전거 실시간 정보를 지도 기반으로 확인할 수 있습니다.
+본 프로젝트는 다음과 같은 기능을 제공합니다.
 
-대여소별 자전거 재고 수량에 따라 색상이 다른 마커를 자동 표시합니다.
+서울시 공공자전거 실시간 데이터를 지도 기반으로 시각화
 
-마커 클러스터링 기능을 적용하여 많은 데이터도 빠르게 확인할 수 있습니다.
+대여소별 잔여 자전거 수에 따라 다른 색상의 마커 표시
 
-Vercel Serverless Function을 이용해 HTTP(Open API)를 HTTPS(GitHub Pages)에서 호출 가능하도록 구성하였습니다.
+마커 클러스터링으로 많은 수의 대여소를 효율적으로 표시
+
+Vercel Serverless Function을 이용해 HTTP API를 HTTPS에서 안정적으로 호출
 
 2. 주요 기술 스택
 
-HTML, CSS, Vanilla JavaScript
+HTML / CSS / Vanilla JavaScript
 
 Kakao Maps JavaScript API
 
@@ -34,42 +33,50 @@ Vercel Serverless Functions
 GitHub Pages
 
 3. 기능 설명
+3-1. 실시간 전체 데이터 자동 로딩
 
-실시간 전체 대여소 데이터 자동 로딩
+서울시 API는 1000개 단위로만 데이터를 제공
 
-1~1000, 1001~2000, … 등 페이지를 자동으로 반복 호출하여 모든 데이터를 수집합니다.
+1~1000, 1001~2000 … 반복 호출하여 전체 데이터를 수집
 
-전체 데이터를 모아서 프론트에 전달합니다.
+모든 데이터를 합쳐서 프론트로 전달
 
-마커 표시 기능
+3-2. 마커 표시 기능
 
-0대: 빨강
+잔여 자전거 대수에 따라 색상 자동 지정
 
-1~4대: 주황
+자전거 수	색상
+0대	빨강
+1~4대	주황
+5대 이상	초록
 
-5대 이상: 초록
+SVG 기반 원형 마커 이미지를 사용해 깔끔한 표현을 구현했습니다.
 
-SVG 기반의 원형 이미지 마커로 구현되었습니다.
+3-3. 마커 클러스터링
 
-마커 클러스터링
+대량의 마커를 묶어서 표시
 
-많은 수의 대여소를 단순화하여 지도 성능을 유지합니다.
+지도 축소 시 클러스터로 합쳐지고, 확대 시 개별 마커로 풀림
 
-줌 레벨에 따라 자동으로 풀리거나 합쳐집니다.
+3-4. 대여소 정보 팝업
 
-대여소 정보 팝업
+마커 클릭 시 인포윈도우 표시
 
-클릭 시 인포윈도우로 상세 정보 제공
-
-대여소명, 거치대 수, 잔여 자전거 수, 거치율 표시
+대여소명, 거치대 수, 잔여 자전거 수, 거치율 등 확인 가능
 
 4. 서버 구성 (Vercel Serverless API)
 
-GitHub Pages는 HTTPS 환경에서 동작하며, 서울시 OpenAPI는 HTTP만 제공되므로 Mixed Content 오류가 발생합니다. 이를 해결하기 위해 Vercel Serverless Function을 사용합니다.
-HTTPS(Frontend) → HTTPS(Vercel) → HTTP(Seoul API) 방식으로 안정적인 통신이 가능합니다.
+GitHub Pages는 HTTPS 기반으로 동작하지만, 서울시 공공 데이터 API는 HTTP만 지원합니다.
+이 경우 Mixed Content 에러가 발생하므로 직접 호출이 불가능합니다.
 
-경로
+이를 해결하기 위해 다음 구조를 사용했습니다.
 
+HTTPS(Front) → HTTPS(Vercel) → HTTP(Seoul API)
+
+Vercel에서 제공하는 Serverless Function이 중간 프록시 역할을 수행하여
+GitHub Pages에서도 안전하게 데이터를 사용할 수 있습니다.
+
+API 경로
 /api/bike
 
 파일 위치
@@ -77,64 +84,97 @@ api/bike.js
 
 주요 기능
 
-1~1000, 1001~2000 … 반복 호출로 전체 데이터 처리
+API 반복 호출 (1~1000, 1001~2000 …)
 
-JSON 형태로 total, rows 응답 제공
+전체 데이터를 취합한 뒤 JSON으로 전달
+
+total, rows 형태 응답
 
 CORS 허용
 
-5. 서버 코드 예시
+5. 서버 코드 예시 (api/bike.js)
+// api/bike.js
+export default async function handler(req, res) {
+  const API_KEY = "YOUR_KEY";
 
-- api/bike.js
+  const perPage = 1000;
+  let start = 1;
+  let end = perPage;
 
-6. 프론트엔드 코드 요약
+  let allRows = [];
 
-- index.html
+  try {
+    while (true) {
+      const url = `http://openapi.seoul.go.kr:8088/${API_KEY}/json/bikeList/${start}/${end}/`;
 
+      const response = await fetch(url);
+      if (!response.ok) break;
+
+      const data = await response.json();
+      if (!data.rentBikeStatus || !data.rentBikeStatus.row) break;
+
+      const rows = data.rentBikeStatus.row;
+      if (!rows.length) break;
+
+      allRows = allRows.concat(rows);
+
+      start += perPage;
+      end += perPage;
+    }
+
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.status(200).json({ total: allRows.length, rows: allRows });
+  } catch (err) {
+    res.status(500).json({ error: "Proxy error", detail: err.message });
+  }
+}
+
+6. 프론트엔드 코드 요약 (index.html)
 주요 역할
 
-카카오맵 로드 및 초기 설정
+카카오맵 생성 및 초기화
 
 Vercel API(/api/bike) 호출
 
-전체 대여소 데이터를 지도 위 마커로 표시
+지도 위에 마커 및 클러스터 표시
 
-마커 색상, 클릭 이벤트, 클러스터링 적용
+마커 색상 지정 및 클릭 이벤트 처리
 
 7. 폴더 구조
 project/
- ├── api/
- │    └── bike.js
- ├── index.html
- └── README.md
+├── api/
+│   └── bike.js       # Vercel Serverless Function
+├── index.html        # Frontend
+└── README.md
 
 8. 설치 및 사용 방법
-
-저장소 클론
-
+1. 저장소 클론
 git clone https://github.com/사용자명/저장소명.git
 
+2. Vercel 프로젝트 Import
 
-Vercel에 프로젝트 Import
+GitHub 연결 후 자동으로 /api/bike.js 인식됨
 
-폴더 내 /api/bike.js 자동 인식
+배포하면 자동으로 API endpoint 생성됨
 
-도메인 할당 후 API endpoint 생성
+3. index.html 수정
 
-index.html 수정
+Vercel API URL을 설정합니다.
 
-PROXY_BASE_URL 값을 Vercel 주소로 변경
+const PROXY_BASE_URL = "https://your-vercel-url.vercel.app/api/bike";
 
-GitHub Pages 활성화
+4. GitHub Pages 활성화
 
-Settings → Pages → 배포 브랜치 선택
+Settings → Pages → 브랜치 선택
 
-웹페이지 접속 후 데이터 불러오기 버튼 클릭
+5. 브라우저에서 실행
+
+웹 페이지 접속 → “데이터 불러오기” 클릭
 
 9. 참고 사항
 
-서울시 공공자전거 API는 1000개 단위로 데이터를 제공하므로 반드시 반복 호출이 필요합니다.
+서울시 API는 최대 1000개씩만 제공하므로 반복 호출이 반드시 필요합니다.
 
-Vercel Serverless는 무료 요금제로 충분히 운영 가능합니다.
+Vercel Serverless 무료 요금제로 충분히 운영할 수 있습니다.
 
-API 인증키 노출 이슈가 있으므로, 장기적으로는 .env와 Vercel 환경 변수를 사용하는 것이 좋습니다.
+API 인증키 노출을 막으려면 Vercel 환경 변수 사용을 권장합니다.
