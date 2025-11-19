@@ -1,53 +1,54 @@
-      /* 기본 레이아웃 */
-      body {
-        font-family: sans-serif;
-        padding: 1.5rem;
-      }
-      h2 {
-        margin-top: 0;
-      }
-      button {
-        font-size: 1rem;
-        padding: 0.4rem 0.9rem;
-        margin-left: 0.5rem;
-      }
+/* 기본 레이아웃 */
 
-      #map {
-        width: 100%;
-        height: 1000px;
-        margin-top: 1rem;
-        border: 1px solid #ccc;
-      }
+body {
+  font-family: sans-serif;
+  padding: 1.5rem;
+}
+h2 {
+  margin-top: 0;
+}
+button {
+  font-size: 1rem;
+  padding: 0.4rem 0.9rem;
+  margin-left: 0.5rem;
+}
 
-      #status {
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        color: #555;
-      }
+#map {
+  width: 100%;
+  height: 1000px;
+  margin-top: 1rem;
+  border: 1px solid #ccc;
+}
 
-      /* 작은 동그라미 마커 스타일 */
-      .bike-marker {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        border: 2px solid #fff;
-        box-sizing: border-box;
-        box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
-      }
+#status {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
 
-      /* 대수에 따른 색상 */
-      .level-0 {
-        background-color: #e74c3c; /* 빨강: 0대 */
-      }
-      .level-1 {
-        background-color: #e67e22; /* 주황: 1~4대 */
-      }
-      .level-2 {
-        background-color: #2ecc71; /* 초록: 5대 이상 */
-      }
+/* 작은 동그라미 마커 스타일 */
+.bike-marker {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-sizing: border-box;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
 
-      /* 인포윈도우 안쪽 스타일 (이제는 CustomOverlay 전체 박스 역할) */
-      /* .bike-info {
+/* 대수에 따른 색상 */
+.level-0 {
+  background-color: #e74c3c; /* 빨강: 0대 */
+}
+.level-1 {
+  background-color: #e67e22; /* 주황: 1~4대 */
+}
+.level-2 {
+  background-color: #2ecc71; /* 초록: 5대 이상 */
+}
+
+/* 인포윈도우 안쪽 스타일 (이제는 CustomOverlay 전체 박스 역할) */
+/* .bike-info {
         max-width: 230px;
         padding: 6px 8px;
         font-size: 13px;
@@ -60,127 +61,146 @@
         word-break: break-all;
       } */
 
-      /* .bike-info-title {
+/* .bike-info-title {
         font-weight: bold;
         margin-bottom: 4px;
       } */
 
-      /* 인포윈도우 커스텀 말풍선 스타일 */
-      .bike-info {
-        position: relative;
+/* 인포윈도우 커스텀 말풍선 스타일 */
+.bike-info {
+  position: relative;
 
-        /* 내용 길이에 맞게 폭 자동 조절 */
-        display: inline-block;
-        width: fit-content;
-        max-width: calc(
-          100vw - 40px
-        ); /* 혹시 너무 길어질 때 화면 밖으로 안 나가도록 */
+  /* 내용 길이에 따라 자동 폭 */
+  display: inline-block;
+  width: auto;
+  max-width: none;
 
-        padding: 6px 10px;
-        font-size: 13px;
-        line-height: 1.35;
-        background: rgba(255, 255, 200, 0.96);
-        border-radius: 10px;
-        border: 1px solid rgba(0, 0, 0, 0.25);
-        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.25);
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.35;
 
-        /* 부모는 기본 줄바꿈 허용 (각 줄에서 개별로 제어) */
-        white-space: normal;
+  /* ▶ 더 투명한 연노랑 (지도/글자 비침) */
+  background: rgba(255, 255, 200, 0.7);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.25);
 
-        /* (원하면 계속 사용) 등장 애니메이션 */
-        animation: bubble-in 0.35s ease-out;
-        transform-origin: bottom center;
-        transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
-      }
+  white-space: nowrap;
 
-      /* 제목(헤더) */
-      .bike-info-header {
-        font-weight: bold;
-        font-size: 14px;
-        padding: 6px 10px;
-        margin: -6px -10px 6px;
-        background: rgba(255, 230, 150, 0.96);
-        border-radius: 10px 10px 0 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  /* 등장 애니메이션(기본) */
+  animation: bubble-in 0.35s ease-out forwards;
+  transform-origin: bottom center;
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+}
 
-        white-space: nowrap; /* 제목은 한 줄 */
-      }
+/* 사라질 때 애니메이션용 클래스 */
+.bike-info.closing {
+  animation: bubble-out 0.25s ease-in forwards;
+}
 
-      /* 본문 */
-      .bike-info-body div {
-        margin: 2px 0;
-        white-space: nowrap; /* 각 줄이 한 줄로만 표시되게 */
-      }
+/* 제목(헤더) */
+.bike-info-header {
+  font-weight: bold;
+  font-size: 14px;
+  padding: 6px 10px;
+  margin: -6px -10px 6px;
 
-      /* 말풍선 꼬리 */
-      .bike-info::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: -10px;
-        margin-left: -10px;
-        border-width: 10px 10px 0 10px;
-        border-style: solid;
-        border-color: rgba(255, 255, 200, 0.96) transparent transparent
-          transparent;
-      }
+  /* 헤더도 살짝 더 투명하게 */
+  background: rgba(255, 230, 150, 0.8);
+  border-radius: 10px 10px 0 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 
-      .bike-info::before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: -11px;
-        margin-left: -11px;
-        border-width: 11px 11px 0 11px;
-        border-style: solid;
-        border-color: rgba(0, 0, 0, 0.25) transparent transparent transparent;
-      }
+  white-space: nowrap;
+}
 
-      /* hover 효과 */
-      .bike-info:hover {
-        transform: translateY(-4px) scale(1.05);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
-      }
+/* 본문 줄들 */
+.bike-info-body div {
+  margin: 2px 0;
+  white-space: nowrap;
+}
 
-      /* 등장 애니메이션 */
-      @keyframes bubble-in {
-        0% {
-          opacity: 0;
-          transform: translateY(12px) scale(0.9);
-        }
-        60% {
-          opacity: 1;
-          transform: translateY(-2px) scale(1.04);
-        }
-        100% {
-          transform: translateY(0) scale(1);
-        }
-      }
+/* 말풍선 꼬리(안쪽 색) */
+.bike-info::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  margin-left: -10px;
+  border-width: 10px 10px 0 10px;
+  border-style: solid;
+  border-color: rgba(255, 255, 200, 0.7) transparent transparent transparent;
+}
 
-      /* 범례(legend) */
-      .legend {
-        margin-top: 0.7rem;
-        font-size: 0.9rem;
-      }
-      .legend-item {
-        display: inline-flex;
-        align-items: center;
-        margin-right: 1rem;
-      }
-      .legend-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        margin-right: 4px;
-        border: 1px solid #fff;
-        box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
-      }
-      .legend-dot.level-0 {
-        background-color: #e74c3c;
-      }
-      .legend-dot.level-1 {
-        background-color: #e67e22;
-      }
-      .legend-dot.level-2 {
-        background-color: #2ecc71;
-      }
+/* 말풍선 꼬리(바깥 테두리) */
+.bike-info::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -11px;
+  margin-left: -11px;
+  border-width: 11px 11px 0 11px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.25) transparent transparent transparent;
+}
+
+/* hover 효과 */
+.bike-info:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* 등장 애니메이션 */
+@keyframes bubble-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 사라질 때 애니메이션 */
+@keyframes bubble-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+}
+
+/* 범례(legend) */
+.legend {
+  margin-top: 0.7rem;
+  font-size: 0.9rem;
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 4px;
+  border: 1px solid #fff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+}
+.legend-dot.level-0 {
+  background-color: #e74c3c;
+}
+.legend-dot.level-1 {
+  background-color: #e67e22;
+}
+.legend-dot.level-2 {
+  background-color: #2ecc71;
+}

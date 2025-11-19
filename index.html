@@ -60,7 +60,7 @@
       let map;
       let clusterer;
       let markers = [];
-      let currentOverlay = null; // InfoWindow 대신 CustomOverlay 사용
+      // let currentOverlay = null; // InfoWindow 대신 CustomOverlay 사용
 
       const statusEl = document.getElementById("status");
 
@@ -140,34 +140,34 @@
       // 전역에서 currentInfoWindow 대신 currentOverlay 쓰고 있는지 확인!
       // let currentOverlay = null; 로 되어 있어야 합니다.
 
-      function showInfoWindow(marker, rowData) {
-        // 이전 말풍선 제거
-        if (currentOverlay) {
-          currentOverlay.setMap(null);
-        }
+      // function showInfoWindow(marker, rowData) {
+      //   // 이전 말풍선 제거
+      //   if (currentOverlay) {
+      //     currentOverlay.setMap(null);
+      //   }
 
-        // 말풍선 DOM 생성
-        const content = document.createElement("div");
-        content.className = "bike-info";
-        content.innerHTML = `
-          <div class="bike-info-header">${rowData.stationName}</div>
-          <div class="bike-info-body">
-            <div>자전거 거치대 수: ${rowData.rackTotCnt}개</div>
-            <div>이용 가능한 수: ${rowData.parkingBikeTotCnt}대</div>
-            <div>거치율: ${rowData.shared}%</div>
-          </div>
-        `;
+      //   // 말풍선 DOM 생성
+      //   const content = document.createElement("div");
+      //   content.className = "bike-info";
+      //   content.innerHTML = `
+      //     <div class="bike-info-header">${rowData.stationName}</div>
+      //     <div class="bike-info-body">
+      //       <div>자전거 거치대 수: ${rowData.rackTotCnt}개</div>
+      //       <div>이용 가능한 수: ${rowData.parkingBikeTotCnt}대</div>
+      //       <div>거치율: ${rowData.shared}%</div>
+      //     </div>
+      //   `;
 
-        // 커스텀 오버레이(말풍선) 생성
-        currentOverlay = new kakao.maps.CustomOverlay({
-          position: marker.getPosition(),
-          content: content,
-          xAnchor: 0.5, // 가로 가운데
-          yAnchor: 1.2, // 마커보다 조금 위 + 꼬리 길이만큼 보정
-        });
+      //   // 커스텀 오버레이(말풍선) 생성
+      //   currentOverlay = new kakao.maps.CustomOverlay({
+      //     position: marker.getPosition(),
+      //     content: content,
+      //     xAnchor: 0.5, // 가로 가운데
+      //     yAnchor: 1.2, // 마커보다 조금 위 + 꼬리 길이만큼 보정
+      //   });
 
-        currentOverlay.setMap(map);
-      }
+      //   currentOverlay.setMap(map);
+      // }
 
       // -----------------------------------------------------
       // 4. 마커 / 클러스터 관리
@@ -213,6 +213,29 @@
           clearMarkers();
           const bounds = new kakao.maps.LatLngBounds();
 
+          // rows.forEach((row) => {
+          //   const lat = parseFloat(row.stationLatitude);
+          //   const lng = parseFloat(row.stationLongitude);
+          //   if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+
+          //   const position = new kakao.maps.LatLng(lat, lng);
+          //   bounds.extend(position);
+
+          //   const levelKey = getLevelKey(row.parkingBikeTotCnt);
+          //   const image = markerImages[levelKey];
+
+          //   const marker = new kakao.maps.Marker({
+          //     position,
+          //     image,
+          //   });
+
+          //   kakao.maps.event.addListener(marker, "click", () =>
+          //     showInfoWindow(marker, row)
+          //   );
+
+          //   markers.push(marker);
+          // });
+
           rows.forEach((row) => {
             const lat = parseFloat(row.stationLatitude);
             const lng = parseFloat(row.stationLongitude);
@@ -229,9 +252,63 @@
               image,
             });
 
-            kakao.maps.event.addListener(marker, "click", () =>
-              showInfoWindow(marker, row)
-            );
+            // 이 마커 전용 말풍선 상태
+            let overlay = null;
+            let contentEl = null;
+
+            // 말풍선 닫기(애니메이션 포함)
+            function closeOverlay() {
+              if (!overlay || !contentEl) return;
+
+              // 닫힘 애니메이션 클래스 추가
+              contentEl.classList.add("closing");
+
+              const handler = () => {
+                if (overlay) {
+                  overlay.setMap(null);
+                }
+                overlay = null;
+                contentEl.removeEventListener("animationend", handler);
+                contentEl = null;
+              };
+
+              // 애니메이션 종료 후 실제 제거
+              contentEl.addEventListener("animationend", handler);
+            }
+
+            kakao.maps.event.addListener(marker, "click", () => {
+              // 이미 열려 있으면 → 닫기
+              if (overlay) {
+                closeOverlay();
+                return;
+              }
+
+              // 새 말풍선 생성
+              contentEl = document.createElement("div");
+              contentEl.className = "bike-info";
+              contentEl.innerHTML = `
+                <div class="bike-info-header">${row.stationName}</div>
+                <div class="bike-info-body">
+                  <div>자전거 거치대 수: ${row.rackTotCnt}개</div>
+                  <div>이용 가능한 수: ${row.parkingBikeTotCnt}대</div>
+                  <div>거치율: ${row.shared}%</div>
+                </div>
+              `;
+
+              // 말풍선 클릭해도 닫히게
+              contentEl.addEventListener("click", () => {
+                closeOverlay();
+              });
+
+              overlay = new kakao.maps.CustomOverlay({
+                position,
+                content: contentEl,
+                xAnchor: 0.5,
+                yAnchor: 1.2,
+              });
+
+              overlay.setMap(map);
+            });
 
             markers.push(marker);
           });
