@@ -55,35 +55,18 @@
         background-color: #2ecc71; /* 초록: 5대 이상 */
       }
 
-      /* 인포윈도우 안쪽 스타일 */
+      /* 인포윈도우 안쪽 스타일 (이제는 CustomOverlay 전체 박스 역할) */
       .bike-info {
-        max-width: 230px; /* 너무 넓어지지 않도록 제한 */
+        max-width: 230px;
         padding: 6px 8px;
         font-size: 13px;
         line-height: 1.4;
-        background: rgba(255, 255, 200, 0.9); /* 옅은 노랑 반투명 */
-        border-radius: 8px; /* 모서리 둥글게 */
+        background: rgba(255, 255, 200, 0.95); /* 옅은 노랑 */
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.25); /* 노란 박스와 일치하는 테두리 */
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-        white-space: normal; /* 여러 줄 허용 */
-        word-break: break-all; /* 한글/긴 문자열도 줄바꿈 허용 ← 핵심 수정 */
-      }
-
-      /* InfoWindow 기본 wrapper 테두리 제거 + 둥글게 */
-      div.info,
-      div.wrap,
-      div.iw_inner,
-      div.balloon,
-      div.inner,
-      .wrap,
-      .info,
-      .iw_inner,
-      .balloon,
-      .inner {
-        border: none !important; /* 기본 검은/회색 테두리 제거 */
-        background: transparent !important; /* 기본 하얀 배경 제거 */
-        box-shadow: none !important; /* 기본 그림자 제거 */
-        border-radius: 0 !important; /* 둥근 모서리는 bike-info에서 처리 */
-        overflow: visible !important;
+        white-space: normal;
+        word-break: break-all;
       }
 
       .bike-info-title {
@@ -170,7 +153,7 @@
       let map;
       let clusterer;
       let markers = [];
-      let currentInfoWindow = null;
+      let currentOverlay = null; // InfoWindow 대신 CustomOverlay 사용
 
       const statusEl = document.getElementById("status");
 
@@ -222,25 +205,29 @@
       // 3. 인포윈도우
       // -----------------------------------------------------
       function showInfoWindow(marker, rowData) {
-        if (currentInfoWindow) {
-          currentInfoWindow.close();
+        if (currentOverlay) {
+          currentOverlay.setMap(null);
         }
 
-        const content = `
-          <div class="bike-info">
-            <div class="bike-info-title">${rowData.stationName}</div>
-            <div>자전거 거치대 수: ${rowData.rackTotCnt}개</div>
-            <div>이용 가능한 수: ${rowData.parkingBikeTotCnt}대</div>
-            <div>거치율: ${rowData.shared}%</div>
-          </div>
+        // 커스텀 오버레이에 넣을 DOM 요소 생성
+        const content = document.createElement("div");
+        content.className = "bike-info";
+        content.innerHTML = `
+          <div class="bike-info-title">${rowData.stationName}</div>
+          <div>자전거 거치대: ${rowData.rackTotCnt}개</div>
+          <div>이용 가능 수: ${rowData.parkingBikeTotCnt}대</div>
+          <div>거치율: ${rowData.shared}%</div>
         `;
 
-        currentInfoWindow = new kakao.maps.InfoWindow({
+        // CustomOverlay 생성
+        currentOverlay = new kakao.maps.CustomOverlay({
           position: marker.getPosition(),
-          content,
+          content: content,
+          xAnchor: 0.5, // 가운데 정렬
+          yAnchor: 1.1, // 마커 약간 위쪽에 붙도록
         });
 
-        currentInfoWindow.open(map, marker);
+        currentOverlay.setMap(map);
       }
 
       // -----------------------------------------------------
