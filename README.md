@@ -1,4 +1,4 @@
-서울시 공공자전거 실시간 지도 시각화
+# 서울시 공공자전거 시각화
 
 따릉이 API · Kakao Map · Vercel Serverless 기반 프로젝트
 
