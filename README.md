@@ -1,6 +1,12 @@
 # 🚴 서울시 공공자전거 실시간 대여정보 시각화
 
-## 🎬 실제 작동 화면 → (https://yssong01.github.io/bike_rental/)
+## 🎬 실제 작동 화면
+ 
+![작동 데모](demo.gif)
+
+**[🚴 실제로 사용해보기 →](https://yssong01.github.io/bike_rental/)**
+
+</div>
 
 </div>
 
