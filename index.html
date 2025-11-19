@@ -74,91 +74,89 @@
         margin-bottom: 4px;
       } */
 
-      /* 인포윈도우(커스텀 오버레이) 말풍선 스타일 */
+      /* 인포윈도우 커스텀 말풍선 스타일 */
       .bike-info {
         position: relative;
 
-        /* ▶ 폭을 일정하게 넓게 고정해서 세로로 찌그러지지 않게 */
-        width: 230px;
-        max-width: 230px;
+        /* ▶ 폭을 충분히 넓혀 세로 찌그러짐 방지 */
+        width: 260px;
+        max-width: 260px;
 
-        padding: 4px 6px; /* 위아래 여백 */
+        padding: 6px 10px;
         font-size: 13px;
-        line-height: 1.3;
-        background: rgba(255, 255, 200, 0.96); /* 옅은 노랑 */
-        border-radius: 8px;
+        line-height: 1.35;
+        background: rgba(255, 255, 200, 0.96);
+        border-radius: 10px;
         border: 1px solid rgba(0, 0, 0, 0.25);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.25);
 
-        /* ▶ 일반적인 줄바꿈 + 너무 길면 단어 단위로 잘라서 다음 줄로 */
         white-space: normal;
-        word-break: normal;
+        word-break: keep-all;
         overflow-wrap: break-word;
 
         /* 등장 애니메이션 */
-        animation: bubble-in 0.35s ease-out;
+        animation: bubble-in 0.3s ease-out;
         transform-origin: bottom center;
-        transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+        transition: transform 0.18s, box-shadow 0.18s;
       }
 
-      /* 말풍선 꼬리 (노란색) */
+      /* 제목(헤더) */
+      .bike-info-header {
+        font-weight: bold;
+        font-size: 14px;
+        padding: 6px 10px;
+        margin: -6px -10px 6px; /* 라운드/패딩과 맞추기 */
+        background: rgba(255, 230, 150, 0.96);
+        border-radius: 10px 10px 0 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      /* 본문 */
+      .bike-info-body div {
+        margin: 2px 0;
+      }
+
+      /* 말풍선 꼬리 */
       .bike-info::after {
         content: "";
         position: absolute;
         left: 50%;
-        bottom: -8px; /* 말풍선 아래쪽에 붙이기 */
-        margin-left: -8px;
-        border-width: 8px 8px 0 8px;
+        bottom: -10px;
+        margin-left: -10px;
+        border-width: 10px 10px 0 10px;
         border-style: solid;
         border-color: rgba(255, 255, 200, 0.96) transparent transparent
           transparent;
       }
 
-      /* 말풍선 꼬리 외곽선(살짝 어두운 테두리) */
       .bike-info::before {
         content: "";
         position: absolute;
         left: 50%;
-        bottom: -9px; /* ::after 보다 1px 아래 */
-        margin-left: -9px;
-        border-width: 9px 9px 0 9px;
+        bottom: -11px;
+        margin-left: -11px;
+        border-width: 11px 11px 0 11px;
         border-style: solid;
         border-color: rgba(0, 0, 0, 0.25) transparent transparent transparent;
       }
 
-      /* 상단 헤더 영역(제목 배경 색 분리) */
-      .bike-info-header {
-        font-weight: bold;
-        padding: 3px 6px; /* 헤더 내부 여백 */
-        margin: -4px -6px 4px; /* 바깥 padding과 맞추기 */
-        background: rgba(255, 230, 150, 0.96); /* 더 진한 노랑 */
-        border-radius: 7px 7px 0 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-      }
-
-      /* 내용 영역 – 여백 최소화 */
-      .bike-info-body div {
-        margin: 1px 0;
-      }
-
-      /* hover 시 살짝 떠오르는 효과 (티가 나게 조금 과하게) */
+      /* hover 효과 */
       .bike-info:hover {
-        transform: translateY(-5px) scale(1.08);
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.35);
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
       }
 
-      /* 등장 애니메이션 정의 */
+      /* 등장 애니메이션 */
       @keyframes bubble-in {
         0% {
           opacity: 0;
-          transform: translateY(10px) scale(0.9);
+          transform: translateY(12px) scale(0.9);
         }
         60% {
           opacity: 1;
           transform: translateY(-2px) scale(1.04);
         }
         100% {
-          opacity: 1;
           transform: translateY(0) scale(1);
         }
       }
