@@ -64,8 +64,8 @@
         background: rgba(255, 255, 200, 0.9); /* 옅은 노랑 반투명 */
         border-radius: 8px; /* 모서리 둥글게 */
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-        word-break: keep-all; /* 단어 중간 잘림 방지 (한글) */
         white-space: normal; /* 여러 줄 허용 */
+        word-break: break-all; /* 한글/긴 문자열도 줄바꿈 허용 ← 핵심 수정 */
       }
 
       .bike-info-title {
@@ -211,8 +211,8 @@
         const content = `
           <div class="bike-info">
             <div class="bike-info-title">${rowData.stationName}</div>
-            <div>거치대: ${rowData.rackTotCnt}개</div>
-            <div>이용 가능: ${rowData.parkingBikeTotCnt}대</div>
+            <div>자전거 거치대 수: ${rowData.rackTotCnt}개</div>
+            <div>이용 가능한 수: ${rowData.parkingBikeTotCnt}대</div>
             <div>거치율: ${rowData.shared}%</div>
           </div>
         `;
