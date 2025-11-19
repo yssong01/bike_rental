@@ -129,7 +129,10 @@
       // -----------------------------------------------------
       // 1. 공공데이터 API 설정
       // -----------------------------------------------------
-      const SEOUL_API_KEY = "4a69654859736a6f3737424a556a48"; // ← 본인 키
+      // const SEOUL_API_KEY = "4a69654859736a6f3737424a556a48"; // ← 본인 키
+
+      // 1. 공공데이터 프록시 API 설정 (Vercel)
+      const PROXY_BASE_URL = "https://bike-rental-drab-eta.vercel.app/api/bike";
 
       let map;
       let clusterer;
@@ -216,46 +219,67 @@
         markers = [];
       }
 
-      // -----------------------------------------------------
-      // 4-1. 여러 페이지(1~1000, 1001~2000, …) 전체 데이터 불러오기
-      // -----------------------------------------------------
+      // // -----------------------------------------------------
+      // // 4-1. 여러 페이지(1~1000, 1001~2000, …) 전체 데이터 불러오기
+      // // -----------------------------------------------------
+      // async function fetchAllBikeData() {
+      //   const perPage = 1000;
+      //   let start = 1;
+      //   let end = perPage;
+      //   let allRows = [];
+
+      //   while (true) {
+      //     const url = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/bikeList/${start}/${end}/`;
+
+      //     console.log("요청:", url);
+
+      //     const res = await fetch(url);
+      //     const data = await res.json();
+
+      //     // 데이터 존재 검사
+      //     if (!data.rentBikeStatus || !data.rentBikeStatus.row) {
+      //       console.log("더 이상 데이터 없음. 반복 종료");
+      //       break;
+      //     }
+
+      //     const rows = data.rentBikeStatus.row;
+
+      //     // rows 개수가 0이면 종료
+      //     if (!rows || rows.length === 0) {
+      //       console.log("0개 응답 → 종료");
+      //       break;
+      //     }
+
+      //     allRows = allRows.concat(rows);
+
+      //     // 다음 구간으로 이동
+      //     start += perPage;
+      //     end += perPage;
+      //   }
+
+      //   console.log("총 로드된 대여소 수:", allRows.length);
+      //   return allRows; // 최종 모든 대여소 데이터 반환
+      // }
+
+      // #------------------------------------------------------
+      // 4-1. 서버(Vercel)에서 이미 전체 데이터를 모아서 내려주므로
+      // 프론트에서는 한 번만 호출하면 됨
       async function fetchAllBikeData() {
-        const perPage = 1000;
-        let start = 1;
-        let end = perPage;
-        let allRows = [];
+        const url = PROXY_BASE_URL; // start/end 필요 없음
 
-        while (true) {
-          const url = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/bikeList/${start}/${end}/`;
+        console.log("요청:", url);
 
-          console.log("요청:", url);
+        const res = await fetch(url);
+        const data = await res.json();
 
-          const res = await fetch(url);
-          const data = await res.json();
-
-          // 데이터 존재 검사
-          if (!data.rentBikeStatus || !data.rentBikeStatus.row) {
-            console.log("더 이상 데이터 없음. 반복 종료");
-            break;
-          }
-
-          const rows = data.rentBikeStatus.row;
-
-          // rows 개수가 0이면 종료
-          if (!rows || rows.length === 0) {
-            console.log("0개 응답 → 종료");
-            break;
-          }
-
-          allRows = allRows.concat(rows);
-
-          // 다음 구간으로 이동
-          start += perPage;
-          end += perPage;
+        // Vercel의 api/bike.js 가 { total, rows } 형태로 응답함
+        if (!data.rows || data.rows.length === 0) {
+          console.log("응답 rows가 비어 있습니다.");
+          return [];
         }
 
-        console.log("총 로드된 대여소 수:", allRows.length);
-        return allRows; // 최종 모든 대여소 데이터 반환
+        console.log("총 로드된 대여소 수:", data.total);
+        return data.rows; // rows 배열만 돌려줌
       }
 
       // -----------------------------------------------------
