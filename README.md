@@ -5,8 +5,6 @@
 [![Deploy](https://img.shields.io/badge/demo-live-brightgreen)](https://yssong01.github.io/bike_rental/)
 [![GitHub](https://img.shields.io/badge/github-repo-blue)](https://github.com/yssong01/bike_rental)
 
-[🚴 실제로 사용해보기 →](https://yssong01.github.io/bike_rental/)
-
 ## 📌 프로젝트 개요
 
 GitHub Pages 환경에서 서울시 공공자전거 실시간 대여소 정보(위치, 재고 수량)를 지도 위에 시각적으로 표현합니다. Vercel Serverless Functions를 활용하여 HTTP(OpenAPI)를 HTTPS(GitHub Pages)에서 안전하게 호출할 수 있도록 구성했습니다.
