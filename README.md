@@ -43,6 +43,7 @@ bike_rental/
 ├── js/
 │   └── config.js            # Kakao 지도 API 키 분리 저장
 ├── index.html               # 메인 웹페이지 (동적 SDK 로드 적용)
+├── style.css                # CSS 파일 분리 저장
 └── README.md
 ```
 
