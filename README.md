@@ -1,6 +1,7 @@
 # 🚴 서울시 공공자전거 실시간 대여정보 시각화
 
 서울시 공공자전거(따릉이) 실시간 대여소 정보를 지도 위에 시각적으로 표현하는 웹 애플리케이션입니다.
+#### 🎬 실제로 사용해보기: 아래 [live] 클릭 → [데이터 불러오기] 클릭 → 정보 확인: 마커 클릭 → 지도 범위: 마우스 스크롤
 
 [![Deploy](https://img.shields.io/badge/demo-live-brightgreen)](https://yssong01.github.io/bike_rental/)
 [![GitHub](https://img.shields.io/badge/github-repo-blue)](https://github.com/yssong01/bike_rental)
@@ -176,7 +177,3 @@ KAKAO_API_KEY=your_kakao_key_here
 ## 👨‍💻 개발자
 
 **yssong01** - [GitHub Profile](https://github.com/yssong01)
-
----
-
-⭐ 이 프로젝트가 도움이 되었다면 Star를 눌러주세요!
