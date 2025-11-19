@@ -98,8 +98,7 @@
   <body>
     <h2>서울시 공공자전거 실시간 대여 현황</h2>
     <p>
-      따릉이 실시간 데이터를 가져와 카카오맵 위에
-      <strong>색깔 동그라미</strong>로 표시합니다.
+      <strong>따릉이 자전기 실시간 위치 및 재고 수량 지도</strong> (카카오맵 + 서울시 공공자전거 실시간 대여 정보 API활용)
     </p>
 
     <button id="loadBtn" onclick="loadBikeData()">데이터 불러오기</button>
@@ -129,7 +128,6 @@
       // -----------------------------------------------------
       // 1. 공공데이터 API 설정
       // -----------------------------------------------------
-      // const SEOUL_API_KEY = "4a69654859736a6f3737424a556a48"; // ← 본인 키
 
       // 1. 공공데이터 프록시 API 설정 (Vercel)
       const PROXY_BASE_URL = "https://bike-rental-drab-eta.vercel.app/api/bike";
