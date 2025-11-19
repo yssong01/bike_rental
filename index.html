@@ -1,0 +1,335 @@
+<!-- [JS 연습] JavaScript API + 지도 시각화 -->
+<!-- fetch를 이용해 “서울시 공공자전거 실시간 대여정보(Open API)”를 불러오고, 해당 데이터를 활용해 카카오맵에 대여소 위치를 표시하는 웹페이지 만들기 -->
+
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>서울시 공공자전거 실시간 지도</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 1.5rem;
+      }
+      h2 {
+        margin-top: 0;
+      }
+      button {
+        font-size: 1rem;
+        padding: 0.4rem 0.9rem;
+        margin-left: 0.5rem;
+      }
+
+      #map {
+        width: 100%;
+        height: 1000px;
+        margin-top: 1rem;
+        border: 1px solid #ccc;
+      }
+
+      #status {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #555;
+      }
+
+      /* 작은 동그라미 마커 스타일 */
+      .bike-marker {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-sizing: border-box;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+      }
+
+      /* 대수에 따른 색상 */
+      .level-0 {
+        background-color: #e74c3c; /* 빨강: 0대 */
+      }
+      .level-1 {
+        background-color: #e67e22; /* 주황: 1~4대 */
+      }
+      .level-2 {
+        background-color: #2ecc71; /* 초록: 5대 이상 */
+      }
+
+      /* 인포윈도우 안쪽 스타일 */
+      .bike-info {
+        padding: 6px 8px;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+      .bike-info strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      /* 범례(legend) */
+      .legend {
+        margin-top: 0.7rem;
+        font-size: 0.9rem;
+      }
+      .legend-item {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 1rem;
+      }
+      .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 4px;
+        border: 1px solid #fff;
+        box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+      }
+      .legend-dot.level-0 {
+        background-color: #e74c3c;
+      }
+      .legend-dot.level-1 {
+        background-color: #e67e22;
+      }
+      .legend-dot.level-2 {
+        background-color: #2ecc71;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>서울시 공공자전거 실시간 대여 현황</h2>
+    <p>
+      따릉이 실시간 데이터를 가져와 카카오맵 위에
+      <strong>색깔 동그라미</strong>로 표시합니다.
+    </p>
+
+    <button id="loadBtn" onclick="loadBikeData()">데이터 불러오기</button>
+    <span id="status">버튼을 눌러 데이터를 불러오세요.</span>
+
+    <div class="legend">
+      <span class="legend-item">
+        <span class="legend-dot level-0"></span> 0대
+      </span>
+      <span class="legend-item">
+        <span class="legend-dot level-1"></span> 1~4대
+      </span>
+      <span class="legend-item">
+        <span class="legend-dot level-2"></span> 5대 이상
+      </span>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Kakao Map SDK (본인 JS키로 변경) -->
+    <script
+      type="text/javascript"
+      src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=151a11f5b9a21a81eb6c1d9d9ab81105&libraries=clusterer"
+    ></script>
+
+    <script>
+      // -----------------------------------------------------
+      // 1. 공공데이터 API 설정
+      // -----------------------------------------------------
+      const SEOUL_API_KEY = "4a69654859736a6f3737424a556a48"; // ← 본인 키
+
+      let map;
+      let clusterer;
+      let markers = [];
+      let currentInfoWindow = null;
+
+      const statusEl = document.getElementById("status");
+
+      // -----------------------------------------------------
+      // 2. 마커 색상 / 이미지 설정
+      // -----------------------------------------------------
+
+      // 자전거 대수에 따라 색 구분 키 반환
+      function getLevelKey(count) {
+        const n = Number(count);
+        if (n === 0) return "level0"; // 빨강
+        if (n <= 4) return "level1"; // 주황
+        return "level2"; // 초록
+      }
+
+      // 원형 SVG를 data URL로 만들어주는 함수
+      function createCircleSvgDataUrl(color) {
+        const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+        <circle cx="9" cy="9" r="7" fill="${color}" stroke="white" stroke-width="2" />
+      </svg>`;
+        return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+      }
+
+      // 색상별 MarkerImage를 미리 만들어 둔다
+      const markerImages = {};
+      function initMarkerImages() {
+        const size = new kakao.maps.Size(18, 18);
+        const options = { offset: new kakao.maps.Point(9, 9) };
+
+        markerImages.level0 = new kakao.maps.MarkerImage(
+          createCircleSvgDataUrl("#e74c3c"), // 0대: 빨강
+          size,
+          options
+        );
+        markerImages.level1 = new kakao.maps.MarkerImage(
+          createCircleSvgDataUrl("#e67e22"), // 1~4대: 주황
+          size,
+          options
+        );
+        markerImages.level2 = new kakao.maps.MarkerImage(
+          createCircleSvgDataUrl("#2ecc71"), // 5대 이상: 초록
+          size,
+          options
+        );
+      }
+
+      // -----------------------------------------------------
+      // 3. 인포윈도우
+      // -----------------------------------------------------
+      function showInfoWindow(marker, rowData) {
+        if (currentInfoWindow) {
+          currentInfoWindow.close();
+        }
+
+        const content = `
+      <div class="bike-info">
+        <strong>${rowData.stationName}</strong>
+        거치대 수: ${rowData.rackTotCnt}개<br/>
+        이용 가능한 자전거: ${rowData.parkingBikeTotCnt}대<br/>
+        거치율: ${rowData.shared}%
+      </div>
+    `;
+
+        currentInfoWindow = new kakao.maps.InfoWindow({
+          position: marker.getPosition(),
+          content,
+        });
+
+        currentInfoWindow.open(map, marker);
+      }
+
+      // -----------------------------------------------------
+      // 4. 마커 / 클러스터 관리
+      // -----------------------------------------------------
+      function clearMarkers() {
+        if (clusterer) clusterer.clear();
+        markers.forEach((m) => m.setMap(null));
+        markers = [];
+      }
+
+      // -----------------------------------------------------
+      // 4-1. 여러 페이지(1~1000, 1001~2000, …) 전체 데이터 불러오기
+      // -----------------------------------------------------
+      async function fetchAllBikeData() {
+        const perPage = 1000;
+        let start = 1;
+        let end = perPage;
+        let allRows = [];
+
+        while (true) {
+          const url = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/bikeList/${start}/${end}/`;
+
+          console.log("요청:", url);
+
+          const res = await fetch(url);
+          const data = await res.json();
+
+          // 데이터 존재 검사
+          if (!data.rentBikeStatus || !data.rentBikeStatus.row) {
+            console.log("더 이상 데이터 없음. 반복 종료");
+            break;
+          }
+
+          const rows = data.rentBikeStatus.row;
+
+          // rows 개수가 0이면 종료
+          if (!rows || rows.length === 0) {
+            console.log("0개 응답 → 종료");
+            break;
+          }
+
+          allRows = allRows.concat(rows);
+
+          // 다음 구간으로 이동
+          start += perPage;
+          end += perPage;
+        }
+
+        console.log("총 로드된 대여소 수:", allRows.length);
+        return allRows; // 최종 모든 대여소 데이터 반환
+      }
+
+      // -----------------------------------------------------
+      // 5. 데이터 불러오기 + 마커 생성 (버튼 onclick에서 호출)
+      // -----------------------------------------------------
+      async function loadBikeData() {
+        statusEl.innerText = "데이터 불러오는 중...";
+
+        try {
+          const rows = await fetchAllBikeData(); // ★ 여기서 전체 페이지 데이터를 한 번에 받음
+
+          statusEl.innerText = `대여소 ${rows.length}개 로드 완료`;
+
+          clearMarkers();
+          const bounds = new kakao.maps.LatLngBounds();
+
+          rows.forEach((row) => {
+            const lat = parseFloat(row.stationLatitude);
+            const lng = parseFloat(row.stationLongitude);
+            if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+
+            const position = new kakao.maps.LatLng(lat, lng);
+            bounds.extend(position);
+
+            const levelKey = getLevelKey(row.parkingBikeTotCnt);
+            const image = markerImages[levelKey];
+
+            const marker = new kakao.maps.Marker({
+              position,
+              image,
+            });
+
+            kakao.maps.event.addListener(marker, "click", () =>
+              showInfoWindow(marker, row)
+            );
+
+            markers.push(marker);
+          });
+
+          if (markers.length > 0) {
+            clusterer.addMarkers(markers);
+            map.setBounds(bounds);
+          }
+        } catch (err) {
+          console.error("데이터 로드 실패:", err);
+          statusEl.innerText = "데이터 불러오기 실패 (콘솔 확인)";
+        }
+      }
+
+      // -----------------------------------------------------
+      // 6. 초기화 (지도 + 클러스터러 생성)
+      // -----------------------------------------------------
+      window.onload = function () {
+        if (!window.kakao || !window.kakao.maps) {
+          console.error("카카오 지도 SDK 로딩 실패");
+          return;
+        }
+
+        const container = document.getElementById("map");
+        const options = {
+          center: new kakao.maps.LatLng(37.5665, 126.978), // 서울 시청 근처
+          level: 7,
+        };
+        map = new kakao.maps.Map(container, options);
+
+        clusterer = new kakao.maps.MarkerClusterer({
+          map,
+          averageCenter: true,
+          minLevel: 7, // 7보다 작게(줌인) 되면 개별 마커로 풀림
+        });
+
+        initMarkerImages(); // 색깔 마커 준비
+        console.log("지도/클러스터러 초기화 완료");
+      };
+    </script>
+  </body>
+</html>
