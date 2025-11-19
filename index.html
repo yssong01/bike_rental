@@ -103,7 +103,7 @@
     </p>
 
     <button id="loadBtn" onclick="loadBikeData()">데이터 불러오기</button>
-    <span id="status">버튼을 눌러 데이터를 불러오세요.</span>
+    <span id="status">버튼을 눌러서 데이터를 불러오세요.</span>
 
     <div class="legend">
       <span class="legend-item">
@@ -119,18 +119,27 @@
 
     <div id="map"></div>
 
-    <!-- Kakao Map SDK (본인 JS키로 변경) -->
-    <script
-      type="text/javascript"
-      src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=151a11f5b9a21a81eb6c1d9d9ab81105&libraries=clusterer"
-    ></script>
+    <!-- 1) Kakao JS 키를 담은 config.js 로드 -->
+    <script src="./js/config.js"></script>
 
+    <!-- 2) config.js 에서 불러온 키로 Kakao Maps SDK를 동적으로 로드 -->
+    <script>
+      if (!window.KAKAO_JS_KEY) {
+        console.error(
+          "KAKAO_JS_KEY가 정의되어 있지 않습니다. js/config.js를 확인하세요."
+        );
+      } else {
+        document.write(`
+          <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${window.KAKAO_JS_KEY}&libraries=clusterer"><\/script>
+        `);
+      }
+    </script>
+
+    <!-- 3) 기존 메인 스크립트 (지도, 마커, 클러스터링 등) -->
     <script>
       // -----------------------------------------------------
-      // 1. 공공데이터 API 설정
-      // -----------------------------------------------------
-
       // 1. 공공데이터 프록시 API 설정 (Vercel)
+      // -----------------------------------------------------
       const PROXY_BASE_URL = "https://bike-rental-drab-eta.vercel.app/api/bike";
 
       let map;
@@ -218,51 +227,9 @@
         markers = [];
       }
 
-      // // -----------------------------------------------------
-      // // 4-1. 여러 페이지(1~1000, 1001~2000, …) 전체 데이터 불러오기
-      // // -----------------------------------------------------
-      // async function fetchAllBikeData() {
-      //   const perPage = 1000;
-      //   let start = 1;
-      //   let end = perPage;
-      //   let allRows = [];
-
-      //   while (true) {
-      //     const url = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/bikeList/${start}/${end}/`;
-
-      //     console.log("요청:", url);
-
-      //     const res = await fetch(url);
-      //     const data = await res.json();
-
-      //     // 데이터 존재 검사
-      //     if (!data.rentBikeStatus || !data.rentBikeStatus.row) {
-      //       console.log("더 이상 데이터 없음. 반복 종료");
-      //       break;
-      //     }
-
-      //     const rows = data.rentBikeStatus.row;
-
-      //     // rows 개수가 0이면 종료
-      //     if (!rows || rows.length === 0) {
-      //       console.log("0개 응답 → 종료");
-      //       break;
-      //     }
-
-      //     allRows = allRows.concat(rows);
-
-      //     // 다음 구간으로 이동
-      //     start += perPage;
-      //     end += perPage;
-      //   }
-
-      //   console.log("총 로드된 대여소 수:", allRows.length);
-      //   return allRows; // 최종 모든 대여소 데이터 반환
-      // }
-
       // #------------------------------------------------------
-      // 4-1. 서버(Vercel)에서 이미 전체 데이터를 모아서 내려주므로
-      // 프론트에서는 한 번만 호출하면 됨
+      // 4-1. 서버(Vercel)에서 이미 전체 데이터를 모아서 내려주므로 프론트에서는 한 번만 호출하면 됨
+      // 여러 페이지(1~1000, 1001~2000, …) 전체 데이터 불러오기
       async function fetchAllBikeData() {
         const url = PROXY_BASE_URL; // start/end 필요 없음
 

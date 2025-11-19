@@ -1,6 +1,7 @@
 // api/bike.js
 export default async function handler(req, res) {
   const API_KEY = "4a69654859736a6f3737424a556a48";
+  // const API_KEY = process.env.SEOUL_API_KEY;  // ← 환경 변수에서 읽기
 
   // 기본 구간 (1~1000)
   const perPage = 1000;
