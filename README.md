@@ -1,28 +1,68 @@
 # 🚴 서울시 공공자전거 실시간 대여정보 시각화
 
 서울시 공공자전거(따릉이) 실시간 대여소 정보를 지도 위에 시각적으로 표현하는 웹 애플리케이션입니다.
-#### 🎬 실제로 사용해보기: 아래 [live] 클릭 → [데이터 불러오기] 클릭 → 정보 확인: 마커 클릭 → 지도 범위: 마우스 스크롤
 
 [![Deploy](https://img.shields.io/badge/demo-live-brightgreen)](https://yssong01.github.io/bike_rental/)
 [![GitHub](https://img.shields.io/badge/github-repo-blue)](https://github.com/yssong01/bike_rental)
+[![Vercel](https://img.shields.io/badge/vercel-deployed-black)](https://vercel.com)
+
+## 🎬 사용 방법
+
+**[🚀 Live Demo](https://yssong01.github.io/bike_rental/)** 클릭 → **데이터 불러오기** → **원하는 마커 클릭** → **말풍선 정보 확인**
+
+---
 
 ## 📌 프로젝트 개요
 
-GitHub Pages 환경에서 서울시 공공자전거 실시간 대여소 정보(위치, 재고 수량)를 지도 위에 시각적으로 표현합니다.
+GitHub Pages 환경에서 따릉이 실시간 대여소 데이터를 표시하기 위해 **Vercel Serverless Functions(VSF)**를 활용하여 **HTTP → HTTPS Proxy**를 구성한 프로젝트입니다.
 
-Vercel Serverless Functions(VSF)를 활용하여 HTTP(OpenAPI)를 HTTPS(GitHub Pages)에서 안전하게 호출할 수 있도록 구성했습니다.
+### 🔐 문제 상황 및 해결
 
-즉 GitHub Pages(HTTPS)에서 서울시 공공자전거 OpenAPI(HTTP)를 직접 호출할 수 없기 때문에 VSF를 이용해 HTTP → HTTPS proxy server를 구축했습니다.
+```
+❌ 문제:
+   서울시 API는 HTTP만 지원
+   GitHub Pages는 HTTPS만 지원
+   → Mixed Content 오류로 직접 호출 불가
 
-또한 카카오 지도 API JavaScript Key는 config.js 파일로 분리하여 관리하고, index.html에서는 동적으로 Kakao Maps SDK를 로드하는 구조로 변경했습니다.
+✅ 해결:
+   GitHub Pages (HTTPS)
+        ↓
+   Vercel Serverless (HTTPS Proxy)
+        ↓
+   Seoul OpenAPI (HTTP)
+```
 
-### 🎯 주요 기능
+### ✨ 프로젝트 특징
 
-- 🗺️ **실시간 지도 시각화** - 카카오맵 기반 대여소 위치 표시
-- 🎨 **색상별 재고 구분** - 잔여 자전거 수에 따른 직관적인 마커 색상
-- 📊 **마커 클러스터링** - 수천 개의 대여소를 효율적으로 표시
-- 🔄 **자동 데이터 로딩** - 전체 대여소 정보 자동 수집
-- 💡 **상세 정보 팝업** - 클릭 시 대여소별 상세 정보 제공
+- 🗺️ **카카오 지도 JS API** - `config.js`로 키 분리 관리
+- 🎨 **스타일 분리** - `style.css`로 UI 코드 모듈화
+- 💬 **고급 말풍선** - CustomOverlay + 애니메이션 + 토글 기능
+- 🔐 **보안 강화** - Vercel Environment Variables로 API Key 보호
+
+---
+
+## 🎯 주요 기능
+
+| 기능 | 설명 |
+|-----|------|
+| 🗺️ **실시간 지도 시각화** | Kakao Maps 기반 대여소 위치 표시 |
+| 🎨 **마커 색상 구분** | 잔여 자전거 수에 따라 자동 색상 적용 (0 대/ 1 ~ 4 대 / 5 대 이상) |
+| 📊 **클러스터링 적용** | 수천 개의 대여소를 효율적으로 표기 |
+| 🔍 **클릭 말풍선** | 클릭 시 상세 정보 표시 |
+| ❌ **토글 기능** | 다시 클릭하면 말풍선 닫힘 |
+| 🔄 **자동 페이징** | 전체 데이터 자동 병합 (1 ~ 1000, 1001 ~ 2000...) |
+| 🔐 **환경 변수** | 서울 OpenAPI Key를 Vercel에서 안전하게 관리 |
+
+### 🌟 말풍선 UI 고급 기능
+
+- ✅ 자동 가로폭 조정 (컨텐츠 길이에 맞춤)
+- ✅ 말풍선 꼬리(Arrow) 스타일 적용
+- ✅ 배경 반투명 처리
+- ✅ Hover 시 scale-up + 그림자 강조
+- ✅ 등장/사라짐 애니메이션
+- ✅ 텍스트 줄바꿈 방지 (`white-space: nowrap`)
+
+---
 
 ## 🛠️ 기술 스택
 
@@ -30,176 +70,244 @@ Vercel Serverless Functions(VSF)를 활용하여 HTTP(OpenAPI)를 HTTPS(GitHub P
 |------|------|
 | **Frontend** | HTML, CSS, JavaScript |
 | **Map API** | Kakao Maps JavaScript API |
-| **Data API** | 서울시 공공데이터 API (따릉이) |
+| **Data API** | 서울시 공공자전거 실시간 API |
 | **Backend** | Vercel Serverless Functions |
 | **Hosting** | GitHub Pages |
+| **보안** | Environment Variables |
+
+---
 
 ## 📂 프로젝트 구조
 
 ```
 bike_rental/
 ├── api/
-│   └── bike.js              # Vercel Serverless Proxy (HTTP → HTTPS)
+│   └── bike.js              # Vercel HTTPS→HTTP Proxy + 전체 데이터 병합
 ├── css/
-│   └── style.css            # 스타일 시트 분리 저장
+│   └── style.css            # 지도/말풍선 UI 스타일 분리
 ├── js/
-│   └── config.js            # Kakao 지도 API 키 분리 저장
-├── index.html               # 메인 웹페이지 (동적 SDK 로드 적용)
+│   └── config.js            # Kakao JS API Key (도메인 기반 보안)
+├── index.html               # 메인 페이지 (동적 Kakao SDK 로드)
 └── README.md
 ```
 
-## 🎨 기능 상세
+---
 
-### 1️⃣ 실시간 데이터 수집
+## 🎨 프론트엔드 기능 상세
 
-서울시 OpenAPI는 1,000개 단위로 페이징되어 있습니다. Vercel 서버에서 다음과 같이 자동 처리합니다:
+### 1️⃣ 지도 + 마커 + 클러스터링
 
-- 1 ~ 1000, 1001 ~ 2000, 2001 ~ 3000... 반복 호출
-- 데이터가 없을 때까지 반복 호출
-- 전체 데이터 통합 후 프론트엔드로 일괄 전달
-- CORS 허용 헤더 적용
+- Kakao Maps SDK를 동적으로 로드
+- 재고 수량에 따라 색상 구분된 SVG 원형 마커 생성
+- 마커 클릭 시 CustomOverlay 말풍선 표시
+- 다시 클릭하면 말풍선이 닫히는 **Toggle 기능** 적용
+- 클러스터링으로 성능 개선
 
-### 2️⃣ 마커 색상 구분
-
-잔여 자전거 수에 따라 자동으로 색상이 변경됩니다:
+#### 마커 색상 규칙
 
 | 재고 수량 | 마커 색상 | 재고 |
 |----------|---------|------|
-| 0 대 | 🔴 빨강 | 없음 |
-| 1 ~ 4 대 | 🟠 주황 | 부족 |
-| 5 대 이상 | 🟢 초록 | 충분 |
+| 0대 | 🔴 빨강 | 없음 |
+| 1~4대 | 🟠 주황 | 부족 |
+| 5대 이상 | 🟢 초록 | 충분 |
 
-### 3️⃣ 마커 클러스터링
+### 2️⃣ 맞춤형 말풍선 (CustomOverlay)
 
-- 줌 아웃 시(지도 축소) 수천 개의 대여소를 자동 그룹화
-- 줌 인 시(지도 확대) 자동으로 개별 마커 표시
-- 성능 최적화된 지도 조작 가능
+현재 말풍선은 다음 기능을 모두 포함합니다:
 
-### 4️⃣ 대여소 정보 팝업
+- ✔️ 말풍선 자동 가로폭
+- ✔️ 텍스트 줄바꿈 방지 (`white-space: nowrap`)
+- ✔️ 꼬리(arrow) 스타일
+- ✔️ 헤더/본문 분리된 UI
+- ✔️ Hover 시 scale-up + 그림자 강조
+- ✔️ 나타날 때 "살짝 커지면서 올라오는" 애니메이션
+- ✔️ 사라질 때 "축소 + 투명도 감소" 애니메이션
 
-마커 클릭 시 다음 정보를 표시합니다:
+---
 
-- 자전거 대여소명 (위치)
-- 자전거 거치대 수
-- 이용 가능한 잔여 자전거 수 (재고)
-- 거치율
+## 🔧 Vercel 서버 측 기능
 
-## 🔧 설치 및 배포
+### 1️⃣ 전체 페이지 자동 통합
 
-### 1. 저장소 클론
+서울시 OpenAPI는 1,000개 단위 페이징이므로:
+
+```
+1~1000 → 1001~2000 → 2001~3000 → ...
+```
+
+Vercel 서버에서 자동 반복 호출하여 하나의 배열(`rows`)로 만들어 프론트에 전달합니다.
+
+### 2️⃣ 환경 변수로 API Key 보호
+
+**Vercel Dashboard → Environment Variables**
+
+```
+Key: SEOUL_API_KEY
+Value: <서울_오픈API_키>
+```
+
+`api/bike.js`에서는 다음과 같이 로드합니다:
+
+```javascript
+const API_KEY = process.env.SEOUL_API_KEY;
+```
+
+---
+
+## ⚙️ 환경 변수 설정
+
+### ✔️ 로컬 개발 시
+
+프로젝트 루트에 `.env.local` 생성:
+
+```env
+SEOUL_API_KEY=여기에_서울_키
+```
+
+`.gitignore`에 추가:
+
+```
+.env
+.env.local
+.env.*.local
+```
+
+### ✔️ Vercel 배포 시
+
+1. Dashboard → **Settings** → **Environment Variables**
+2. **Key**: `SEOUL_API_KEY`
+3. **Value**: 입력 후 **Save**
+4. 신규 Deployment 자동 생성됨
+
+---
+
+## 🏗️ 서버 아키텍처
+
+```
+┌─────────────────────────────┐
+│  GitHub Pages (Frontend)    │
+│  HTTPS ✅                    │
+└──────────────┬──────────────┘
+               │
+               ↓
+┌─────────────────────────────┐
+│  Vercel Serverless          │
+│  HTTPS Proxy + CORS ✅      │
+└──────────────┬──────────────┘
+               │
+               ↓
+┌─────────────────────────────┐
+│  Seoul Public API           │
+│  HTTP (OpenAPI)             │
+└─────────────────────────────┘
+```
+
+---
+
+## 🚀 설치 및 배포
+
+### 1. Git 클론
 
 ```bash
 git clone https://github.com/yssong01/bike_rental.git
 cd bike_rental
 ```
 
-### 2. Vercel 프로젝트 설정
+### 2. Vercel 배포
 
-1. [Vercel](https://vercel.com) 접속 후 로그인
-2. **New Project** 클릭
-3. GitHub 저장소 Import
-4. `/api/bike.js` 자동 인식 확인
-5. **Deploy** 클릭
+1. [vercel.com](https://vercel.com) 접속 후 로그인
+2. **New Project** → GitHub repo 선택
+3. `/api/bike.js` 자동 인식 확인
+4. **Deploy** 클릭
+5. 배포 후 주소 확인:
+   ```
+   https://<your-vercel>.vercel.app/api/bike
+   ```
 
-배포 후 Vercel API endpoint를 확인합니다:
+### 3. index.html 수정
 
-```
-https://<your-vercel-project>.vercel.app/api/bike
-```
+Vercel 주소를 `PROXY_BASE_URL`에 입력:
 
-### 3. 프론트엔드 설정
-
-1. index.html에서 다음 수정:
-```
-const PROXY_BASE_URL = "https://<your-vercel-project>.vercel.app/api/bike";
+```javascript
+const PROXY_BASE_URL = "https://<your-vercel>.vercel.app/api/bike";
 ```
 
-2. 또한 Kakao JS 키는 다음 파일에서 관리합니다: js/config.js
-```
-const KAKAO_JS_KEY = "본인의_카카오_JS_KEY";
-```
-
-3. index.html은 이 키를 불러와 SDK를 동적으로 로드합니다:
-```
-<script src="./js/config.js"></script>
-<script>
-  document.write(`
-    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${window.KAKAO_JS_KEY}&libraries=clusterer"><\/script>
-  `);
-</script>
-```
-
-### 4. GitHub Pages 활성화
+### 4. GitHub Pages 설정
 
 1. GitHub 저장소 → **Settings**
 2. **Pages** 메뉴 선택
-3. **Source**에서 배포할 Branch 지정 (예: `main` 선택)
-4. **Save** 클릭
+3. **Source**에서 브랜치 선택 → **Save**
+4. 접속: `https://your-id.github.io/bike_rental/`
 
-### 5. 웹페이지 접속
+### 5. 환경 변수 설정
 
-`https://your-username.github.io/bike_rental/` 접속 후 **데이터 불러오기** 버튼을 클릭합니다.
+Vercel Dashboard에서:
+
+1. **Settings** → **Environment Variables**
+2. `SEOUL_API_KEY` 추가
+3. 재배포 (자동)
+
+---
 
 ## 🌐 API 정보
 
-### 서울시 공공자전거 실시간 대여정보
+### 서울시 공공자전거 실시간 API
 
-- **URL**: [서울 열린데이터 광장](https://data.seoul.go.kr/dataList/OA-15493/A/1/datasetView.do)
-- **Format**: XML
+- **출처**: [서울 열린데이터 광장](https://data.seoul.go.kr/dataList/OA-15493/A/1/datasetView.do)
+- **Format**: XML/JSON
+- **Paging**: 1,000개 단위
 - **Update**: 실시간
-- **paging**: 1000 단위
-- 응답 형식: JSON 지원
 
 ### 카카오맵 API
 
-- **Guide**: [Kakao Maps API 문서](https://apis.map.kakao.com/web/guide/)
-- **Key**: JavaScript 키 필요
-- 도메인 등록 필수
+- **SDK**: JavaScript API
+- **가이드**: [Kakao Maps API 문서](https://apis.map.kakao.com/web/guide/)
+- **요구사항**: JavaScript 키 + 도메인 등록 필수
 
-## 🏗️ 서버 아키텍처
-
-GitHub Pages는 HTTPS만 지원하지만, 서울시 공공데이터 API는 HTTP로 제공됩니다.
-Mixed Content 오류를 해결하기 위해 다음과 같은 구조를 사용합니다:
-
-```
-Frontend (GitHub Pages, HTTPS)
-    ↓
-Vercel Serverless (HTTPS Proxy)
-    ↓
-Seoul OpenAPI (HTTP)
-```
-
-## ⚙️ 환경 변수 설정 (선택사항)
-
-API 키 보안을 위해 환경 변수 사용을 권장합니다:
-
-**Vercel Dashboard → Settings → Environment Variables**
-
-```
-SEOUL_API_KEY=your_api_key_here
-KAKAO_API_KEY=your_kakao_key_here
-```
-
-카카오 JS 키는 프론트에서 노출되는 특성상 환경 변수 관리가 불가하며, 보안은 도메인 등록으로 해결 가능합니다.
-
+---
 
 ## 📝 참고 사항
 
-- 서울시 공공자전거 API는 1,000개 단위 페이징이 필수입니다.
-- Vercel '무료 요금제'로 충분히 운영 가능합니다.
-- API 인증키는 환경 변수로 관리하는 것을 권장합니다.
-- 카카오맵 API 키는 '반드시' 도메인 등록이 필요합니다.
-- config.js는 키 분리를 위한 코드 정리 목적입니다.
-- 민감 API Key는 반드시 Vercel 환경 변수로 관리합니다.
+- 서울시 공공자전거 API는 1,000개 단위 페이징이 필수입니다
+- Vercel 무료 요금제로 충분히 운영 가능합니다
+- API 인증키는 환경 변수로 관리하는 것을 권장합니다
+- 카카오맵 API 키는 **도메인 등록**이 필요합니다
+- Mixed Content 오류 방지를 위해 Proxy 서버 필수
+
+---
+
+## 🎓 학습 포인트
+
+이 프로젝트를 통해 배울 수 있는 것들:
+
+- ✅ HTTP ↔ HTTPS 문제 해결 (Proxy 패턴)
+- ✅ Serverless Functions 활용
+- ✅ 환경 변수 보안 관리
+- ✅ 대용량 데이터 페이징 처리
+- ✅ Kakao Maps API 통합
+- ✅ CustomOverlay 커스터마이징
+- ✅ CSS 애니메이션 및 인터랙션
+
+---
 
 ## 🚀 데모
 
 **Live Demo**: [https://yssong01.github.io/bike_rental/](https://yssong01.github.io/bike_rental/)
 
+---
+
 ## 📄 라이선스
 
 이 프로젝트는 서울시 공공데이터와 카카오맵 API를 활용합니다. 각 서비스의 이용 약관을 준수해야 합니다.
 
+---
+
 ## 👨‍💻 개발자
 
 **yssong01** - [GitHub Profile](https://github.com/yssong01)
+
+---
+
+⭐ 이 프로젝트가 도움이 되었다면 Star를 눌러주세요!
+
+🚴 Happy Biking!
